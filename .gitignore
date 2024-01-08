@@ -9,6 +9,9 @@
 
 # Executables
 *.exe
+*.exec
+bin/screen_capture.jpg
+bin/tested_.jpg
 
 # Build directory
 build/
@@ -23,3 +26,6 @@ opencv/build/
 *.vcxproj
 *.vcxproj.filters
 .DS_STORE
+
+# Other
+scratch/

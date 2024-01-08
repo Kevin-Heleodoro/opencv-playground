@@ -17,6 +17,10 @@ Then navigate to the `/bin` directory and run the name of the executable i.e. `.
 6. `cd` into bin and run `./photo`.
 7. You can also run `./photo <path_to_image>` if you want to use your own image.
 
+8. Used template from assignment to create `vidDisplay.cpp`.
+9. Run comman `make vid` from within `./src` directory.
+10. `cd` into `bin/` and run `./vid`.
+
 ## Errors I ran into
 
 1. Makefile was not pointing to the correct location for opencv library.

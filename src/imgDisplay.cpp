@@ -8,6 +8,7 @@
 #include <opencv2/core.hpp>
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 
 /**
@@ -33,8 +34,8 @@ int main(int argc, char *argv[])
 
     if (argc < 2)
     {
-        std::string image_path = cv::samples::findFile("starry_night.jpg");
-        src = cv::imread(image_path);
+        std::string fileName = cv::samples::findFile("starry_night.jpg");
+        src = cv::imread(fileName);
     }
     else
     {
@@ -49,6 +50,8 @@ int main(int argc, char *argv[])
     }
 
     cv::namedWindow(fileName, cv::WINDOW_NORMAL);
+    cv::putText(src, "Press 'q' to quit or 's' to save.", cv::Point(100, 400),
+                cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(255, 255, 255), 2);
     cv::imshow(fileName, src);
 
     char key = cv::waitKey(0);
@@ -57,7 +60,7 @@ int main(int argc, char *argv[])
     {
         cv::destroyAllWindows();
     }
-    else if (key = 's')
+    else if (key == 's')
     {
         cv::destroyAllWindows();
         cv::imwrite("tested.jpg", src);

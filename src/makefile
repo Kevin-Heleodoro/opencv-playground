@@ -23,8 +23,8 @@ photo: imgDisplay.o
 	$(CC) $^ -o $(BINDIR)/$@ $(LDLIBS)
 #	$(CC) $^ -o $(BINDIR)/$@ $(LDFLAGS) $(LDLIBS)
 
-# vid: vidDisplay.o 
-# 	$(CC) $^ -o $(BINDIR)/$@ $(LDFLAGS) $(LDLIBS)
+vid: vidDisplay.o 
+	$(CC) $^ -o $(BINDIR)/$@ $(LDLIBS)
 #
 #face: faceDetect.o filters.o
 #	$(CC) $^ -o $(BINDIR)/$@ $(LDFLAGS) $(LDLIBS)
