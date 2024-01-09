@@ -17,7 +17,7 @@ photo: imgDisplay.o
 	echo "Photo"
 	$(CC) $^ -o $(BINDIR)/$@.exe $(LDLIBS)
 
-vid: vidDisplay.o 
+vid: vidDisplay.o filter.o
 	$(CC) $^ -o $(BINDIR)/$@.exe $(LDLIBS)
 #
 #face: faceDetect.o filters.o

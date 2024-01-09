@@ -11,6 +11,8 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
 
+#include "filter.h"
+
 /**
  * @brief Get the current date and time as a formatted string.
  *
@@ -64,7 +66,7 @@ int main(int argc, char *argv[])
 
     cv::namedWindow("Video");
 
-    std::vector<std::string> commandText = {"Commands:", "'q': quit", "'s': screen shot", "'g': greyscale"};
+    std::vector<std::string> commandText = {"Commands:", "'q': quit", "'s': screen shot", "'g': greyscale", "'h': alternate grayscale"};
 
     // Text properties
     int baseline = 0;
@@ -73,6 +75,7 @@ int main(int argc, char *argv[])
     double fontScale = 1.0;
 
     bool gray = false;
+    bool altGray = false;
 
     for (;;)
     {
@@ -83,11 +86,24 @@ int main(int argc, char *argv[])
             break;
         }
 
+        // Regular grayscale
         if (gray)
         {
             cv::cvtColor(frame, frame, cv::COLOR_BGR2GRAY);
         }
 
+        // Alternate grayscale
+        if (altGray)
+        {
+            cv::Mat grayFrame;
+            int grayColor = greyscale(frame, grayFrame);
+            if (grayColor == 0)
+            {
+                frame = grayFrame;
+            }
+        }
+
+        // Text properties for command list display
         int startY = frame.rows - (commandText.size() + 1) * 20;
         int textX = 10;
 
@@ -101,14 +117,15 @@ int main(int argc, char *argv[])
         }
 
         cv::imshow("Video", frame);
-
         char key = cv::waitKey(10);
 
+        // Quit program
         if (key == 'q')
         {
             break;
         }
 
+        // Screen capture
         if (key == 's')
         {
             // Display screen captured text
@@ -127,9 +144,18 @@ int main(int argc, char *argv[])
             cv::waitKey(500); // Wait for .5 seconds
         }
 
+        // Toggle grayscale
         if (key == 'g')
         {
             gray = !gray;
+            altGray = false;
+        }
+
+        // Toggle alternate grayscale
+        if (key == 'h')
+        {
+            altGray = !altGray;
+            gray = false;
         }
     }
 
