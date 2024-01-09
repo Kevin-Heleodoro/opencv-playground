@@ -7,8 +7,28 @@
 #include <iostream>
 #include <opencv2/core.hpp>
 #include <opencv2/opencv.hpp>
+#include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
+
+/**
+ * @brief Get the current date and time as a formatted string.
+ *
+ * This function retrieves the current date and time from the system clock and formats it as a string
+ * in the format "YYYY-MM-DD_HH-MM-SS". The formatted string is returned.
+ *
+ * @return std::string The current date and time as a formatted string.
+ */
+std::string getCurrentDateTimeStamp()
+{
+    auto now = std::chrono::system_clock::now();
+    std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
+
+    std::stringstream ss;
+    ss << std::put_time(std::localtime(&currentTime), "%Y-%m-%d_%H-%M-%S");
+
+    return ss.str();
+}
 
 /**
  * @brief Uses OpenCV to display live video.
@@ -26,6 +46,7 @@
 int main(int argc, char *argv[])
 {
     cv::VideoCapture *capdev;
+    cv::Mat frame;
 
     capdev = new cv::VideoCapture(0);
     if (!capdev->isOpened())
@@ -36,9 +57,22 @@ int main(int argc, char *argv[])
 
     cv::Size refS((int)capdev->get(cv::CAP_PROP_FRAME_WIDTH),
                   (int)capdev->get(cv::CAP_PROP_FRAME_HEIGHT));
-    printf("Expected size: %d %d\n", refS.width, refS.height);
-    cv::namedWindow("Video", 1);
-    cv::Mat frame;
+    int fps = capdev->get(cv::CAP_PROP_FPS);
+
+    printf("Size: %d %d\n", refS.width, refS.height);
+    printf("FPS: %d\n", fps);
+
+    cv::namedWindow("Video");
+
+    std::vector<std::string> commandText = {"Commands:", "'q': quit", "'s': screen shot", "'g': greyscale"};
+
+    // Text properties
+    int baseline = 0;
+    int thickness = 2;
+    int lineType = 8;
+    double fontScale = 1.0;
+
+    bool gray = false;
 
     for (;;)
     {
@@ -49,6 +83,23 @@ int main(int argc, char *argv[])
             break;
         }
 
+        if (gray)
+        {
+            cv::cvtColor(frame, frame, cv::COLOR_BGR2GRAY);
+        }
+
+        int startY = frame.rows - (commandText.size() + 1) * 20;
+        int textX = 10;
+
+        // Display command text
+        for (const std::string &line : commandText)
+        {
+            cv::Size lineSize = cv::getTextSize(line, cv::FONT_HERSHEY_SIMPLEX, fontScale, thickness, &baseline);
+            cv::putText(frame, line, cv::Point(textX, startY),
+                        cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(255, 255, 255), thickness, lineType);
+            startY += lineSize.height + 5;
+        }
+
         cv::imshow("Video", frame);
 
         char key = cv::waitKey(10);
@@ -57,9 +108,28 @@ int main(int argc, char *argv[])
         {
             break;
         }
-        else if (key == 's')
+
+        if (key == 's')
         {
-            cv::imwrite("screen_capture.jpg", frame);
+            // Display screen captured text
+            std::string screenCapturedText = "Screen captured.";
+            cv::Size screenCapturedTextSize = cv::getTextSize(screenCapturedText, cv::FONT_HERSHEY_SIMPLEX, fontScale, thickness, &baseline);
+            int textX = (frame.cols - screenCapturedTextSize.width) / 2;
+            int textY = (frame.rows + screenCapturedTextSize.height) / 2;
+            cv::putText(frame, screenCapturedText, cv::Point(textX, textY),
+                        cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(255, 255, 255), thickness, lineType);
+
+            // Get current timestamp and save screen capture
+            std::string currentDateTimeStamp = getCurrentDateTimeStamp();
+            cv::imwrite(currentDateTimeStamp + "_screen_capture.jpg", frame);
+
+            cv::imshow("Video", frame);
+            cv::waitKey(500); // Wait for .5 seconds
+        }
+
+        if (key == 'g')
+        {
+            gray = !gray;
         }
     }
 

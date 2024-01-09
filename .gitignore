@@ -10,7 +10,7 @@
 # Executables
 *.exe
 *.exec
-bin/screen_capture.jpg
+bin/*screen_capture.jpg
 bin/tested_.jpg
 
 # Build directory
