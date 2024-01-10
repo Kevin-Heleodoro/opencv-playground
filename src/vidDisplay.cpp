@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 
     cv::namedWindow("Video");
 
-    std::vector<std::string> commandText = {"Commands:", "'q': quit", "'s': screen shot", "'g': greyscale", "'h': alternate grayscale"};
+    std::vector<std::string> commandText = {"Commands:", "'q': quit", "'s': screen shot", "'g': greyscale", "'h': alternate grayscale", "'p': Sepia tone"};
 
     // Text properties
     int baseline = 0;
@@ -76,6 +76,7 @@ int main(int argc, char *argv[])
 
     bool gray = false;
     bool altGray = false;
+    bool sepia = false;
 
     for (;;)
     {
@@ -100,6 +101,17 @@ int main(int argc, char *argv[])
             if (grayColor == 0)
             {
                 frame = grayFrame;
+            }
+        }
+
+        // Sepia tone
+        if (sepia)
+        {
+            cv::Mat sepiaFrame;
+            int sepiaColor = sepiaTone(frame, sepiaFrame);
+            if (sepiaColor == 0)
+            {
+                frame = sepiaFrame;
             }
         }
 
@@ -149,6 +161,7 @@ int main(int argc, char *argv[])
         {
             gray = !gray;
             altGray = false;
+            sepia = false;
         }
 
         // Toggle alternate grayscale
@@ -156,6 +169,15 @@ int main(int argc, char *argv[])
         {
             altGray = !altGray;
             gray = false;
+            sepia = false;
+        }
+
+        // Toggle sepia tone
+        if (key == 'p')
+        {
+            sepia = !sepia;
+            gray = false;
+            altGray = false;
         }
     }
 
