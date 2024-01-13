@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 
     cv::namedWindow("Video");
 
-    std::vector<std::string> commandText = {"Commands:", "'q': quit", "'s': screen shot", "'g': greyscale", "'h': alternate grayscale", "'p': Sepia tone"};
+    std::vector<std::string> commandText = {"Commands:", "'q': quit", "'s': screen shot", "'g': greyscale", "'h': alternate grayscale", "'p': sepia tone", "'b': blur"};
 
     // Text properties
     int baseline = 0;
@@ -77,6 +77,7 @@ int main(int argc, char *argv[])
     bool gray = false;
     bool altGray = false;
     bool sepia = false;
+    bool blur = false;
 
     for (;;)
     {
@@ -115,8 +116,19 @@ int main(int argc, char *argv[])
             }
         }
 
+        // Blur
+        if (blur)
+        {
+            cv::Mat blurFrame;
+            int blurColor = blur5x5_2(frame, blurFrame);
+            if (blurColor == 0)
+            {
+                frame = blurFrame;
+            }
+        }
+
         // Text properties for command list display
-        int startY = frame.rows - (commandText.size() + 1) * 20;
+        int startY = frame.rows - (commandText.size() + 5) * 20;
         int textX = 10;
 
         // Display command text
@@ -125,7 +137,7 @@ int main(int argc, char *argv[])
             cv::Size lineSize = cv::getTextSize(line, cv::FONT_HERSHEY_SIMPLEX, fontScale, thickness, &baseline);
             cv::putText(frame, line, cv::Point(textX, startY),
                         cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(255, 255, 255), thickness, lineType);
-            startY += lineSize.height + 5;
+            startY += lineSize.height + 10;
         }
 
         cv::imshow("Video", frame);
@@ -162,6 +174,7 @@ int main(int argc, char *argv[])
             gray = !gray;
             altGray = false;
             sepia = false;
+            blur = false;
         }
 
         // Toggle alternate grayscale
@@ -170,6 +183,7 @@ int main(int argc, char *argv[])
             altGray = !altGray;
             gray = false;
             sepia = false;
+            blur = false;
         }
 
         // Toggle sepia tone
@@ -178,6 +192,16 @@ int main(int argc, char *argv[])
             sepia = !sepia;
             gray = false;
             altGray = false;
+            blur = false;
+        }
+
+        // Toggle blur
+        if (key == 'b')
+        {
+            blur = !blur;
+            gray = false;
+            altGray = false;
+            sepia = false;
         }
     }
 

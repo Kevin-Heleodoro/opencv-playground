@@ -12,6 +12,7 @@
 *.exec
 bin/*screen_capture.jpg
 bin/tested_.jpg
+bin/blur_*.jpg
 
 # Build directory
 build/

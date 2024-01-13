@@ -19,6 +19,9 @@ photo: imgDisplay.o
 
 vid: vidDisplay.o filter.o
 	$(CC) $^ -o $(BINDIR)/$@.exe $(LDLIBS)
+
+blur: timeBlur.o filter.o
+	$(CC) $^ -o $(BINDIR)/$@.exe $(LDLIBS)
 #
 #face: faceDetect.o filters.o
 #	$(CC) $^ -o $(BINDIR)/$@ $(LDFLAGS) $(LDLIBS)

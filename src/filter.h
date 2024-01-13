@@ -33,4 +33,28 @@ int greyscale(cv::Mat &src, cv::Mat &dst);
  */
 int sepiaTone(cv::Mat &src, cv::Mat &dst);
 
+/**
+ * @brief Blur a color image using a 5x5 Gaussian kernel.
+ *
+ * This function blurs a color image using a 5x5 Gaussian kernel. It does so by
+ * applying the kernel to each pixel within a nested loop.
+ *
+ * @param src The source image.
+ * @param dst The destination image.
+ * @return 0 if successful, -1 if error.
+ */
+int blur5x5_1(cv::Mat &src, cv::Mat &dst);
+
+/**
+ * @brief Blur a color image using a 1x5 Gaussian kernel.
+ *
+ * This function blurs a color image using a 1x5 Gaussian kernel. It does so by
+ * applying separable 1x5 filters to each pixel in two passes (horizontal and veritcal).
+ *
+ * @param src The source image.
+ * @param dst The destination image.
+ * @return 0 if successful, -1 if error.
+ */
+int blur5x5_2(cv::Mat &src, cv::Mat &dst);
+
 #endif

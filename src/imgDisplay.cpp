@@ -21,7 +21,7 @@
  * specified, the program will use the default image "starry_night.jpg".
  *
  * @param argc Number of command line arguments.
- * @param argv Array of command line arguments.
+ * @param argv Array of command line arguments. This should be a relative path to an image file.
  * @return 0 if successful, -1 if error.
  *
  * @note Currently the program will only read "starry_night.jpg" if it is

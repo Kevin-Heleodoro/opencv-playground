@@ -27,3 +27,9 @@
 
 1. Makefile was not pointing to the correct location for opencv library.
 2. The PKG_CONFIG_PATH was not set to the correct location.
+
+## Credits
+
+[Smoothing Images Tutorial](https://docs.opencv.org/3.4/dc/dd3/tutorial_gausian_median_blur_bilateral_filter.html)
+https://stackoverflow.com/questions/16132242/apply-gaussianblur-to-individual-pixels
+https://en.wikipedia.org/wiki/Stencil_%28numerical_analysis%29
