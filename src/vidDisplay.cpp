@@ -6,10 +6,10 @@
 #include <cstring>
 #include <iostream>
 #include <opencv2/core.hpp>
-#include <opencv2/opencv.hpp>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/opencv.hpp>
 
 #include "filter.h"
 
@@ -57,8 +57,7 @@ int main(int argc, char *argv[])
         return (-1);
     }
 
-    cv::Size refS((int)capdev->get(cv::CAP_PROP_FRAME_WIDTH),
-                  (int)capdev->get(cv::CAP_PROP_FRAME_HEIGHT));
+    cv::Size refS((int)capdev->get(cv::CAP_PROP_FRAME_WIDTH), (int)capdev->get(cv::CAP_PROP_FRAME_HEIGHT));
     int fps = capdev->get(cv::CAP_PROP_FPS);
 
     printf("Size: %d %d\n", refS.width, refS.height);
@@ -66,7 +65,9 @@ int main(int argc, char *argv[])
 
     cv::namedWindow("Video");
 
-    std::vector<std::string> commandText = {"Commands:", "'q': quit", "'s': screen shot", "'g': greyscale", "'h': alternate grayscale", "'p': sepia tone", "'b': blur"};
+    std::vector<std::string> commandText = {
+        "Commands:",       "'q': quit", "'s': screen shot", "'g': greyscale", "'h': alternate grayscale",
+        "'p': sepia tone", "'b': blur"};
 
     // Text properties
     int baseline = 0;
@@ -120,7 +121,7 @@ int main(int argc, char *argv[])
         if (blur)
         {
             cv::Mat blurFrame;
-            int blurColor = blur5x5_2(frame, blurFrame);
+            int blurColor = blur5x5_4(frame, blurFrame);
             if (blurColor == 0)
             {
                 frame = blurFrame;
@@ -135,8 +136,8 @@ int main(int argc, char *argv[])
         for (const std::string &line : commandText)
         {
             cv::Size lineSize = cv::getTextSize(line, cv::FONT_HERSHEY_SIMPLEX, fontScale, thickness, &baseline);
-            cv::putText(frame, line, cv::Point(textX, startY),
-                        cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(255, 255, 255), thickness, lineType);
+            cv::putText(frame, line, cv::Point(textX, startY), cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(255, 255, 255),
+                        thickness, lineType);
             startY += lineSize.height + 10;
         }
 
@@ -154,11 +155,12 @@ int main(int argc, char *argv[])
         {
             // Display screen captured text
             std::string screenCapturedText = "Screen captured.";
-            cv::Size screenCapturedTextSize = cv::getTextSize(screenCapturedText, cv::FONT_HERSHEY_SIMPLEX, fontScale, thickness, &baseline);
+            cv::Size screenCapturedTextSize =
+                cv::getTextSize(screenCapturedText, cv::FONT_HERSHEY_SIMPLEX, fontScale, thickness, &baseline);
             int textX = (frame.cols - screenCapturedTextSize.width) / 2;
             int textY = (frame.rows + screenCapturedTextSize.height) / 2;
-            cv::putText(frame, screenCapturedText, cv::Point(textX, textY),
-                        cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(255, 255, 255), thickness, lineType);
+            cv::putText(frame, screenCapturedText, cv::Point(textX, textY), cv::FONT_HERSHEY_SIMPLEX, 1.0,
+                        cv::Scalar(255, 255, 255), thickness, lineType);
 
             // Get current timestamp and save screen capture
             std::string currentDateTimeStamp = getCurrentDateTimeStamp();
