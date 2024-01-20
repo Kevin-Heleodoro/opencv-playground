@@ -28,9 +28,11 @@
 1. Makefile was not pointing to the correct location for opencv library.
 2. The PKG_CONFIG_PATH was not set to the correct location.
 3. When creating the blur filter using the `src.ptr` extra care had to be taken to ensure the loop was not trying to access an out-of-bounds pixel.
+4. When breaking up the blur filter into 1x5 arrays I was accidentally accessing the y values instead of x which caused the dst image to be rotated.
 
 ## Credits
 
 [Smoothing Images Tutorial](https://docs.opencv.org/3.4/dc/dd3/tutorial_gausian_median_blur_bilateral_filter.html)
 https://stackoverflow.com/questions/16132242/apply-gaussianblur-to-individual-pixels
 https://en.wikipedia.org/wiki/Stencil_%28numerical_analysis%29
+https://onlinedocs.microchip.com/pr/GUID-37AD5EEE-6FAB-48FC-89F6-CAA649534B2A-en-US-1/index.html

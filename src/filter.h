@@ -85,6 +85,18 @@ int blur5x5_3(cv::Mat &src, cv::Mat &dst);
  **/
 int blur5x5_4(cv::Mat &src, cv::Mat &dst);
 
+/**
+ * @brief Blur a color image using a 1x5 Gaussian kernel.
+ *
+ * This function blurs a color image using a 1x5 Gaussian kernel. It does so by
+ * applying separable 1x5 filters to each pixel in two passes (horizontal and veritcal). This version of the function
+ * uses the .ptr method to access pixels. It also does not loop through the kernel, but instead calculates the sum of
+ * each row and column of the kernel separately.
+ *
+ * @param src The source image.
+ * @param dst The destination image.
+ * @return 0 if successful, -1 if error.
+ */
 int blur5x5_5(cv::Mat &src, cv::Mat &dst);
 
 /**
@@ -97,5 +109,8 @@ int blur5x5_5(cv::Mat &src, cv::Mat &dst);
  * @return 0 if successful, -1 if error.
  */
 int gauss3x3at(cv::Mat &src, cv::Mat &dst);
+
+int sobelX3x3(cv::Mat &src, cv::Mat &dst);
+int sobelY3x3(cv::Mat &src, cv::Mat &dst);
 
 #endif

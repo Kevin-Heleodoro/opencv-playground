@@ -32,6 +32,16 @@ std::string getCurrentDateTimeStamp()
     return ss.str();
 }
 
+// void resetFilters(bool &gray, bool &altGray, bool &sepia, bool &blur, bool &sobelX, bool &sobelY)
+// {
+//     gray = false;
+//     altGray = false;
+//     sepia = false;
+//     blur = false;
+//     sobelX = false;
+//     sobelY = false;
+// }
+
 /**
  * @brief Uses OpenCV to display live video.
  *
@@ -67,7 +77,7 @@ int main(int argc, char *argv[])
 
     std::vector<std::string> commandText = {
         "Commands:",       "'q': quit", "'s': screen shot", "'g': greyscale", "'h': alternate grayscale",
-        "'p': sepia tone", "'b': blur"};
+        "'p': sepia tone", "'b': blur", "'x': sobel x",     "'y': sobel y"};
 
     // Text properties
     int baseline = 0;
@@ -79,6 +89,8 @@ int main(int argc, char *argv[])
     bool altGray = false;
     bool sepia = false;
     bool blur = false;
+    bool sobelX = false;
+    bool sobelY = false;
 
     for (;;)
     {
@@ -87,6 +99,30 @@ int main(int argc, char *argv[])
         {
             printf("frame is empty\n");
             break;
+        }
+
+        // Sobel X
+        if (sobelX)
+        {
+            cv::Mat sobelXFrame;
+            int sobelXColor = sobelX3x3(frame, sobelXFrame);
+            if (sobelXColor == 0)
+            {
+                // frame = sobelXFrame;
+                cv::convertScaleAbs(sobelXFrame, frame, 1, 0);
+            }
+        }
+
+        // Sobel Y
+        if (sobelY)
+        {
+            cv::Mat sobelYFrame;
+            int sobelYColor = sobelY3x3(frame, sobelYFrame);
+            if (sobelYColor == 0)
+            {
+                // frame = sobelYFrame;
+                cv::convertScaleAbs(sobelYFrame, frame, 1, 0);
+            }
         }
 
         // Regular grayscale
@@ -173,37 +209,71 @@ int main(int argc, char *argv[])
         // Toggle grayscale
         if (key == 'g')
         {
+            // resetFilters(gray, altGray, sepia, blur, sobelX, sobelY);
             gray = !gray;
             altGray = false;
             sepia = false;
             blur = false;
+            sobelX = false;
+            sobelY = false;
         }
 
         // Toggle alternate grayscale
         if (key == 'h')
         {
+            // resetFilters(gray, altGray, sepia, blur, sobelX, sobelY);
             altGray = !altGray;
             gray = false;
             sepia = false;
             blur = false;
+            sobelX = false;
+            sobelY = false;
         }
 
         // Toggle sepia tone
         if (key == 'p')
         {
+            // resetFilters(gray, altGray, sepia, blur, sobelX, sobelY);
             sepia = !sepia;
             gray = false;
             altGray = false;
             blur = false;
+            sobelX = false;
+            sobelY = false;
         }
 
         // Toggle blur
         if (key == 'b')
         {
+            // resetFilters(gray, altGray, sepia, blur, sobelX, sobelY);
             blur = !blur;
             gray = false;
             altGray = false;
             sepia = false;
+            sobelX = false;
+            sobelY = false;
+        }
+
+        if (key == 'x')
+        {
+            // resetFilters(gray, altGray, sepia, blur, sobelX, sobelY);
+            sobelX = !sobelX;
+            gray = false;
+            altGray = false;
+            sepia = false;
+            blur = false;
+            sobelY = false;
+        }
+
+        if (key == 'y')
+        {
+            // resetFilters(gray, altGray, sepia, blur, sobelX, sobelY);
+            sobelY = !sobelY;
+            gray = false;
+            altGray = false;
+            sepia = false;
+            blur = false;
+            sobelX = false;
         }
     }
 
