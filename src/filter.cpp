@@ -363,7 +363,6 @@ int blur5x5_5(cv::Mat &src, cv::Mat &dst)
 
     int kernel[5] = {1, 2, 4, 2, 1};
     int kernelSum = 10;
-    cv::Mat temp = cv::Mat::zeros(src.size(), src.type());
 
     // Horizontal pass
     for (int y = 0; y < src.rows; y++)
@@ -385,9 +384,9 @@ int blur5x5_5(cv::Mat &src, cv::Mat &dst)
     // Vertical pass
     for (int y = 2; y < src.rows - 2; y++)
     {
+        cv::Vec3b *ptr = dst.ptr<cv::Vec3b>(y);
         for (int x = 0; x < src.cols; x++)
         {
-            cv::Vec3b *ptr = dst.ptr<cv::Vec3b>(y);
             for (int k = 0; k < src.channels(); k++)
             {
                 int sum = ptr[x - 2][k] + 2 * ptr[x - 1][k] + 4 * ptr[x][k] + 2 * ptr[x + 1][k] + ptr[x + 2][k];
@@ -443,6 +442,16 @@ int gauss3x3at(cv::Mat &src, cv::Mat &dst) // pass images by reference
     return 0;
 }
 
+/**
+ * @brief Enhance vertical lines in an image using a 3x3 Sobel kernel.
+ *
+ * This function enhances vertical lines in an image using a 3x3 Sobel kernel. It does so by
+ * applying the kernel to each pixel within a nested loop.
+ *
+ * @param src The source image.
+ * @param dst The destination image.
+ * @return 0 if successful, -1 if error.
+ */
 int sobelX3x3(cv::Mat &src, cv::Mat &dst)
 {
     // -1  0  1
@@ -458,24 +467,33 @@ int sobelX3x3(cv::Mat &src, cv::Mat &dst)
 
     for (int y = 1; y < src.rows - 1; y++)
     {
+        cv::Vec3b *ptrUp = src.ptr<cv::Vec3b>(y - 1);
+        cv::Vec3b *ptr = src.ptr<cv::Vec3b>(y);
+        cv::Vec3b *ptrDown = src.ptr<cv::Vec3b>(y + 1);
         for (int x = 1; x < src.cols - 1; x++)
         {
             for (int k = 0; k < src.channels(); k++)
             {
-                int sum = -src.at<cv::Vec3b>(y - 1, x - 1)[k] - 2 * src.at<cv::Vec3b>(y, x - 1)[k] -
-                          src.at<cv::Vec3b>(y + 1, x - 1)[k] + src.at<cv::Vec3b>(y - 1, x + 1)[k] +
-                          2 * src.at<cv::Vec3b>(y, x + 1)[k] + src.at<cv::Vec3b>(y + 1, x + 1)[k];
+                int sum = -ptrUp[x - 1][k] - 2 * ptr[x - 1][k] - ptrDown[x - 1][k] + ptrUp[x + 1][k] +
+                          2 * ptr[x + 1][k] + ptrDown[x + 1][k];
 
-                // sum /= 4;
-
-                // dst.at<cv::Vec3b>(y, x)[k] = sum;
-                dst.at<cv::Vec3s>(y, x)[k] = static_cast<short>(sum);
+                dst.ptr<cv::Vec3s>(y)[x][k] = static_cast<short>(sum);
             }
         }
     }
     return 0;
 }
 
+/**
+ * @brief Enhance horizontal lines in an image using a 3x3 Sobel kernel.
+ *
+ * This function enhances horizontal lines in an image using a 3x3 Sobel kernel. It does so by
+ * applying the kernel to each pixel within a nested loop.
+ *
+ * @param src The source image.
+ * @param dst The destination image.
+ * @return 0 if successful, -1 if error.
+ */
 int sobelY3x3(cv::Mat &src, cv::Mat &dst)
 {
     // -1 -2 -1
@@ -492,20 +510,89 @@ int sobelY3x3(cv::Mat &src, cv::Mat &dst)
 
     for (int y = 1; y < src.rows - 1; y++)
     {
+        cv::Vec3b *ptrUp = src.ptr<cv::Vec3b>(y - 1);
+        cv::Vec3b *ptrDown = src.ptr<cv::Vec3b>(y + 1);
+
         for (int x = 1; x < src.cols - 1; x++)
         {
             for (int k = 0; k < src.channels(); k++)
             {
-                int sum = -src.at<cv::Vec3b>(y - 1, x - 1)[k] - 2 * src.at<cv::Vec3b>(y - 1, x)[k] -
-                          src.at<cv::Vec3b>(y - 1, x + 1)[k] + src.at<cv::Vec3b>(y + 1, x - 1)[k] +
-                          2 * src.at<cv::Vec3b>(y + 1, x)[k] + src.at<cv::Vec3b>(y + 1, x + 1)[k];
+                int sum = -ptrUp[x - 1][k] - 2 * ptrUp[x][k] - ptrUp[x + 1][k] + ptrDown[x - 1][k] + 2 * ptrDown[x][k] +
+                          ptrDown[x + 1][k];
 
-                // sum /= 4;
-
-                // dst.at<cv::Vec3b>(y, x)[k] = sum;
-                dst.at<cv::Vec3s>(y, x)[k] = static_cast<short>(sum);
+                dst.ptr<cv::Vec3s>(y)[x][k] = static_cast<short>(sum);
             }
         }
     }
+    return 0;
+}
+
+/**
+ * @brief Calculate the gradient magnitude of an image.
+ *
+ * This function calculates the gradient magnitude of an image. It does so by
+ * applying horizontal and vertical sobel filters to each pixel within a nested loop.
+ *
+ * @param sx The source image with a sobel x filter applied.
+ * @param sy The source image with a sobel y filter applied.
+ * @param dst The destination image.
+ * @return 0 if successful, -1 if error.
+ */
+int magnitude(cv::Mat &sx, cv::Mat &sy, cv::Mat &dst)
+{
+
+    if (sx.empty() || sy.empty())
+    {
+        printf("Frame is empty\n");
+        return -1;
+    }
+
+    dst.create(sx.size(), CV_8UC3); // Create dst with unsigned char type
+
+    for (int y = 0; y < dst.rows; y++)
+    {
+        cv::Vec3s *ptrSx = sx.ptr<cv::Vec3s>(y);
+        cv::Vec3s *ptrSy = sy.ptr<cv::Vec3s>(y);
+        cv::Vec3b *ptrDst = dst.ptr<cv::Vec3b>(y);
+        for (int x = 0; x < dst.cols; x++)
+        {
+            for (int k = 0; k < dst.channels(); k++)
+            {
+                int sum = sqrt(pow(ptrSx[x][k], 2) + pow(ptrSy[x][k], 2));
+
+                ptrDst[x][k] = sum;
+            }
+        }
+    }
+
+    return 0;
+}
+
+int blurQuantize(cv::Mat &src, cv::Mat &dst, int levels)
+{
+    if (src.empty())
+    {
+        printf("Frame is empty\n");
+        return -1;
+    }
+
+    blur5x5_5(src, dst);
+
+    float buckets = 255.0 / levels;
+
+    for (int y = 0; y < dst.rows; y++)
+    {
+        cv::Vec3b *ptr = dst.ptr<cv::Vec3b>(y);
+        for (int x = 0; x < dst.cols; x++)
+        {
+            for (int k = 0; k < dst.channels(); k++)
+            {
+                uchar pixel = ptr[x][k];
+                int quantized = static_cast<int>(pixel / buckets);
+                pixel = static_cast<uchar>(quantized * buckets);
+            }
+        }
+    }
+
     return 0;
 }

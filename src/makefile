@@ -17,14 +17,14 @@ photo: imgDisplay.o
 	echo "Photo"
 	$(CC) $^ -o $(BINDIR)/$@.exe $(LDLIBS)
 
-vid: vidDisplay.o filter.o
+vid: vidDisplay.o filter.o faceDetect.o
 	$(CC) $^ -o $(BINDIR)/$@.exe $(LDLIBS)
 
 blur: timeBlur.o filter.o
 	$(CC) $^ -o $(BINDIR)/$@.exe $(LDLIBS)
 #
-#face: faceDetect.o filters.o
-#	$(CC) $^ -o $(BINDIR)/$@ $(LDFLAGS) $(LDLIBS)
+face: showFaces.o filter.o faceDetect.o
+	$(CC) $^ -o $(BINDIR)/$@.exe $(LDFLAGS) $(LDLIBS)
 #
 #imod: imgMod.o
 #	$(CC) $^ -o $(BINDIR)/$@ $(LDFLAGS) $(LDLIBS)

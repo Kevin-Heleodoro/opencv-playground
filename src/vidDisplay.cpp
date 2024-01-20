@@ -11,6 +11,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/opencv.hpp>
 
+#include "faceDetect.h"
 #include "filter.h"
 
 /**
@@ -76,8 +77,9 @@ int main(int argc, char *argv[])
     cv::namedWindow("Video");
 
     std::vector<std::string> commandText = {
-        "Commands:",       "'q': quit", "'s': screen shot", "'g': greyscale", "'h': alternate grayscale",
-        "'p': sepia tone", "'b': blur", "'x': sobel x",     "'y': sobel y"};
+        "Commands:",          "'q': quit",       "'s': screen shot", "'g': greyscale", "'h': alternate grayscale",
+        "'p': sepia tone",    "'b': blur",       "'x': sobel x",     "'y': sobel y",   "'m': gradient magnitude",
+        "'l': blur quantize", "'f': face detect"};
 
     // Text properties
     int baseline = 0;
@@ -91,6 +93,9 @@ int main(int argc, char *argv[])
     bool blur = false;
     bool sobelX = false;
     bool sobelY = false;
+    bool gradientMagnitude = false;
+    bool blurQuantized = false;
+    bool faceDetect = false;
 
     for (;;)
     {
@@ -99,6 +104,46 @@ int main(int argc, char *argv[])
         {
             printf("frame is empty\n");
             break;
+        }
+
+        // Detect faces
+        if (faceDetect)
+        {
+            cv::Mat greyFrame;
+            cv::cvtColor(frame, greyFrame, cv::COLOR_BGR2GRAY);
+            std::vector<cv::Rect> faces;
+            detectFaces(greyFrame, faces);
+            drawBoxes(frame, faces);
+        }
+
+        // Blur quantize
+        if (blurQuantized)
+        {
+            cv::Mat blurQuantizeFrame;
+            int levels = 10;
+            int blurQuantizeColor = blurQuantize(frame, blurQuantizeFrame, levels);
+            if (blurQuantizeColor == 0)
+            {
+                frame = blurQuantizeFrame;
+            }
+        }
+
+        // Gradient magnitude
+        if (gradientMagnitude)
+        {
+            cv::Mat sobelXFrame;
+            cv::Mat sobelYFrame;
+            int sobelXColor = sobelX3x3(frame, sobelXFrame);
+            int sobelYColor = sobelY3x3(frame, sobelYFrame);
+            if (sobelXColor == 0 && sobelYColor == 0)
+            {
+                cv::Mat gradientMagnitudeFrame;
+                int gradientMagnitudeColor = magnitude(sobelXFrame, sobelYFrame, gradientMagnitudeFrame);
+                if (gradientMagnitudeColor == 0)
+                {
+                    frame = gradientMagnitudeFrame;
+                }
+            }
         }
 
         // Sobel X
@@ -165,14 +210,14 @@ int main(int argc, char *argv[])
         }
 
         // Text properties for command list display
-        int startY = frame.rows - (commandText.size() + 5) * 20;
+        int startY = frame.rows - (commandText.size() + 5) * 25;
         int textX = 10;
 
         // Display command text
         for (const std::string &line : commandText)
         {
             cv::Size lineSize = cv::getTextSize(line, cv::FONT_HERSHEY_SIMPLEX, fontScale, thickness, &baseline);
-            cv::putText(frame, line, cv::Point(textX, startY), cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(255, 255, 255),
+            cv::putText(frame, line, cv::Point(textX, startY), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255),
                         thickness, lineType);
             startY += lineSize.height + 10;
         }
@@ -216,6 +261,9 @@ int main(int argc, char *argv[])
             blur = false;
             sobelX = false;
             sobelY = false;
+            gradientMagnitude = false;
+            blurQuantized = false;
+            // faceDetect = false;
         }
 
         // Toggle alternate grayscale
@@ -228,6 +276,9 @@ int main(int argc, char *argv[])
             blur = false;
             sobelX = false;
             sobelY = false;
+            gradientMagnitude = false;
+            blurQuantized = false;
+            // faceDetect = false;
         }
 
         // Toggle sepia tone
@@ -240,6 +291,9 @@ int main(int argc, char *argv[])
             blur = false;
             sobelX = false;
             sobelY = false;
+            gradientMagnitude = false;
+            blurQuantized = false;
+            // faceDetect = false;
         }
 
         // Toggle blur
@@ -252,8 +306,12 @@ int main(int argc, char *argv[])
             sepia = false;
             sobelX = false;
             sobelY = false;
+            gradientMagnitude = false;
+            blurQuantized = false;
+            // faceDetect = false;
         }
 
+        // Toggle sobel x
         if (key == 'x')
         {
             // resetFilters(gray, altGray, sepia, blur, sobelX, sobelY);
@@ -263,8 +321,12 @@ int main(int argc, char *argv[])
             sepia = false;
             blur = false;
             sobelY = false;
+            gradientMagnitude = false;
+            blurQuantized = false;
+            // faceDetect = false;
         }
 
+        // Toggle sobel y
         if (key == 'y')
         {
             // resetFilters(gray, altGray, sepia, blur, sobelX, sobelY);
@@ -274,6 +336,51 @@ int main(int argc, char *argv[])
             sepia = false;
             blur = false;
             sobelX = false;
+            gradientMagnitude = false;
+            blurQuantized = false;
+            // faceDetect = false;
+        }
+
+        // Toggle gradient magnitude
+        if (key == 'm')
+        {
+            gradientMagnitude = !gradientMagnitude;
+            gray = false;
+            altGray = false;
+            sepia = false;
+            blur = false;
+            sobelX = false;
+            sobelY = false;
+            blurQuantized = false;
+            // faceDetect = false;
+        }
+
+        // Toggle blur quantize
+        if (key == 'l')
+        {
+            blurQuantized = !blurQuantized;
+            gray = false;
+            altGray = false;
+            sepia = false;
+            blur = false;
+            sobelX = false;
+            sobelY = false;
+            gradientMagnitude = false;
+            // faceDetect = false;
+        }
+
+        // Toggle face detection
+        if (key == 'f')
+        {
+            faceDetect = !faceDetect;
+            // gray = false;
+            // altGray = false;
+            // sepia = false;
+            // blur = false;
+            // sobelX = false;
+            // sobelY = false;
+            // gradientMagnitude = false;
+            // blurQuantized = false;
         }
     }
 

@@ -29,6 +29,7 @@
 2. The PKG_CONFIG_PATH was not set to the correct location.
 3. When creating the blur filter using the `src.ptr` extra care had to be taken to ensure the loop was not trying to access an out-of-bounds pixel.
 4. When breaking up the blur filter into 1x5 arrays I was accidentally accessing the y values instead of x which caused the dst image to be rotated.
+5. The xml file needs to be relative from where the program is being ran (i.e. the bin dir).
 
 ## Credits
 
