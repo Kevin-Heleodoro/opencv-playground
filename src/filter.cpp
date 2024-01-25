@@ -568,6 +568,17 @@ int magnitude(cv::Mat &sx, cv::Mat &sy, cv::Mat &dst)
     return 0;
 }
 
+/**
+ * @brief Blur a color image using a 5x5 Gaussian kernel. Quantize the image to a specified number of levels.
+ *
+ * This function blurs a color image using a 5x5 Gaussian kernel. It then quantizes the image to a specified number of
+ * levels. It does so by dividing the image into buckets and setting each pixel to the average value of the bucket.
+ *
+ * @param src The source image.
+ * @param dst The destination image.
+ * @param levels The number of levels to quantize the image to.
+ * @return 0 if successful, -1 if error.
+ */
 int blurQuantize(cv::Mat &src, cv::Mat &dst, int levels)
 {
     if (src.empty())
@@ -590,6 +601,109 @@ int blurQuantize(cv::Mat &src, cv::Mat &dst, int levels)
                 uchar pixel = ptr[x][k];
                 int quantized = static_cast<int>(pixel / buckets);
                 pixel = static_cast<uchar>(quantized * buckets);
+            }
+        }
+    }
+
+    return 0;
+}
+
+/**
+ * @brief Apply an emboss effect to an image.
+ *
+ * This function applies an emboss effect to an image. It does so by applying a 3x3 Sobel filter to the image and
+ * adding 128 to the result. It then clamps the result to the range [0, 255].
+ *
+ * @param sx The source image with a sobel x filter applied.
+ * @param sy The source image with a sobel y filter applied.
+ * @param dst The destination image.
+ * @return 0 if successful, -1 if error.
+ */
+int embossEffect(cv::Mat &sx, cv::Mat &sy, cv::Mat &dst)
+{
+    if (sx.empty() || sy.empty())
+    {
+        printf("Frame is empty\n");
+        return -1;
+    }
+
+    dst.create(sx.size(), CV_8UC3); // Create dst with unsigned char type
+
+    const float dirX = 0.7071f;
+    const float dirY = 0.7071f;
+    const int offset = 128;
+
+    for (int y = 0; y < dst.rows; y++)
+    {
+        cv::Vec3s *ptrSx = sx.ptr<cv::Vec3s>(y);
+        cv::Vec3s *ptrSy = sy.ptr<cv::Vec3s>(y);
+        cv::Vec3b *ptrDst = dst.ptr<cv::Vec3b>(y);
+
+        for (int x = 0; x < dst.cols; x++)
+        {
+            for (int k = 0; k < dst.channels(); k++)
+            {
+                int val = dirX * ptrSx[x][k] + dirY * ptrSy[x][k] + offset;
+                val = std::min(std::max(val, 0), 255);
+                ptrDst[x][k] = static_cast<uchar>(val);
+            }
+        }
+    }
+
+    return 0;
+}
+
+/**
+ * @brief Adjust the brightness of an image.
+ *
+ * This function adjusts the brightness of an image. It does so by multiplying each pixel by a specified value.
+ *
+ * @param src The source image.
+ * @param dst The destination image.
+ * @param brightness The brightness value to multiply each pixel by.
+ * @return 0 if successful, -1 if error.
+ */
+int adjustBrightness(cv::Mat &src, cv::Mat &dst, double brightness)
+{
+    if (src.empty())
+    {
+        printf("Frame is empty\n");
+        return -1;
+    }
+
+    src.copyTo(dst);
+
+    for (int y = 0; y < dst.rows; ++y)
+    {
+        for (int x = 0; x < dst.cols; ++x)
+        {
+            for (int k = 0; k < dst.channels(); k++)
+            {
+                dst.at<cv::Vec3b>(y, x)[k] = std::min(std::max(dst.at<cv::Vec3b>(y, x)[k] * brightness, 0.0), 255.0);
+            }
+        }
+    }
+
+    return 0;
+}
+
+int negativeFilter(cv::Mat &src, cv::Mat &dst)
+{
+    if (src.empty())
+    {
+        printf("Frame is empty\n");
+        return -1;
+    }
+
+    src.copyTo(dst);
+
+    for (int y = 0; y < dst.rows; ++y)
+    {
+        for (int x = 0; x < dst.cols; ++x)
+        {
+            for (int k = 0; k < dst.channels(); k++)
+            {
+                dst.at<cv::Vec3b>(y, x)[k] = 255 - dst.at<cv::Vec3b>(y, x)[k];
             }
         }
     }

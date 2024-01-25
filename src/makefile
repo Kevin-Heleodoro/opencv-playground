@@ -14,7 +14,6 @@ LDLIBS = $(shell pkg-config --libs opencv4)
 BINDIR = ../bin
 
 photo: imgDisplay.o
-	echo "Photo"
 	$(CC) $^ -o $(BINDIR)/$@.exe $(LDLIBS)
 
 vid: vidDisplay.o filter.o faceDetect.o
@@ -22,10 +21,13 @@ vid: vidDisplay.o filter.o faceDetect.o
 
 blur: timeBlur.o filter.o
 	$(CC) $^ -o $(BINDIR)/$@.exe $(LDLIBS)
-#
+
 face: showFaces.o filter.o faceDetect.o
 	$(CC) $^ -o $(BINDIR)/$@.exe $(LDFLAGS) $(LDLIBS)
-#
+
+fourier: fourier.o
+	$(CC) $^ -o $(BINDIR)/$@.exe $(LDFLAGS) $(LDLIBS)
+
 #imod: imgMod.o
 #	$(CC) $^ -o $(BINDIR)/$@ $(LDFLAGS) $(LDLIBS)
 #

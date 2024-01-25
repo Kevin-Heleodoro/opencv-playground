@@ -4,6 +4,7 @@
 
 #include <cstdio>
 #include <cstring>
+#include <iomanip>
 #include <iostream>
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
@@ -77,9 +78,9 @@ int main(int argc, char *argv[])
     cv::namedWindow("Video");
 
     std::vector<std::string> commandText = {
-        "Commands:",          "'q': quit",       "'s': screen shot", "'g': greyscale", "'h': alternate grayscale",
-        "'p': sepia tone",    "'b': blur",       "'x': sobel x",     "'y': sobel y",   "'m': gradient magnitude",
-        "'l': blur quantize", "'f': face detect"};
+        "Commands:",          "'q': quit",        "'s': screen shot", "'g': greyscale", "'h': alternate grayscale",
+        "'p': sepia tone",    "'b': blur",        "'x': sobel x",     "'y': sobel y",   "'m': gradient magnitude",
+        "'l': blur quantize", "'f': face detect", "'e': emboss",      "'n': negative",  "'+ or -': brightness"};
 
     // Text properties
     int baseline = 0;
@@ -96,6 +97,9 @@ int main(int argc, char *argv[])
     bool gradientMagnitude = false;
     bool blurQuantized = false;
     bool faceDetect = false;
+    bool emboss = false;
+    bool negative = false;
+    double brightness = 1.0;
 
     for (;;)
     {
@@ -104,6 +108,35 @@ int main(int argc, char *argv[])
         {
             printf("frame is empty\n");
             break;
+        }
+
+        // Negative
+        if (negative)
+        {
+            cv::Mat negativeFrame;
+            int negativeColor = negativeFilter(frame, negativeFrame);
+            if (negativeColor == 0)
+            {
+                frame = negativeFrame;
+            }
+        }
+
+        // Emboss
+        if (emboss)
+        {
+            cv::Mat sobelXFrame;
+            cv::Mat sobelYFrame;
+            int sobelXColor = sobelX3x3(frame, sobelXFrame);
+            int sobelYColor = sobelY3x3(frame, sobelYFrame);
+            if (sobelXColor == 0 && sobelYColor == 0)
+            {
+                cv::Mat embossFrame;
+                int embossColor = embossEffect(sobelXFrame, sobelYFrame, embossFrame);
+                if (embossColor == 0)
+                {
+                    frame = embossFrame;
+                }
+            }
         }
 
         // Detect faces
@@ -222,6 +255,25 @@ int main(int argc, char *argv[])
             startY += lineSize.height + 10;
         }
 
+        // Display brightness
+        std::stringstream brightnessStream;
+        brightnessStream << "Brightness: " << std::fixed << std::setprecision(2) << brightness;
+        std::string brightnessText = brightnessStream.str();
+        int centerX = frame.cols / 2;
+        cv::Size brightnessTextSize =
+            cv::getTextSize(brightnessText, cv::FONT_HERSHEY_SIMPLEX, fontScale, thickness, &baseline);
+        cv::putText(frame, brightnessText, cv::Point(centerX, startY), cv::FONT_HERSHEY_SIMPLEX, 0.5,
+                    cv::Scalar(255, 255, 255), thickness, lineType);
+
+        // Adjust brightness
+        cv::Mat brightenedFrame;
+        int brightnessAdjusted = adjustBrightness(frame, brightenedFrame, brightness);
+        if (brightnessAdjusted == 0)
+        {
+            frame = brightenedFrame;
+        }
+
+        // Display frame
         cv::imshow("Video", frame);
         char key = cv::waitKey(10);
 
@@ -234,6 +286,11 @@ int main(int argc, char *argv[])
         // Screen capture
         if (key == 's')
         {
+            // Get current timestamp and save screen capture
+            std::string currentDateTimeStamp = getCurrentDateTimeStamp();
+            cv::imwrite(currentDateTimeStamp + "_screen_capture.jpg", frame);
+            cv::waitKey(500); // Wait for .5 seconds
+
             // Display screen captured text
             std::string screenCapturedText = "Screen captured.";
             cv::Size screenCapturedTextSize =
@@ -242,10 +299,6 @@ int main(int argc, char *argv[])
             int textY = (frame.rows + screenCapturedTextSize.height) / 2;
             cv::putText(frame, screenCapturedText, cv::Point(textX, textY), cv::FONT_HERSHEY_SIMPLEX, 1.0,
                         cv::Scalar(255, 255, 255), thickness, lineType);
-
-            // Get current timestamp and save screen capture
-            std::string currentDateTimeStamp = getCurrentDateTimeStamp();
-            cv::imwrite(currentDateTimeStamp + "_screen_capture.jpg", frame);
 
             cv::imshow("Video", frame);
             cv::waitKey(500); // Wait for .5 seconds
@@ -381,6 +434,44 @@ int main(int argc, char *argv[])
             // sobelY = false;
             // gradientMagnitude = false;
             // blurQuantized = false;
+        }
+
+        // Toggle emboss
+        if (key == 'e')
+        {
+            emboss = !emboss;
+            gray = false;
+            altGray = false;
+            sepia = false;
+            blur = false;
+            sobelX = false;
+            sobelY = false;
+            gradientMagnitude = false;
+        }
+
+        // Toggle negative
+        if (key == 'n')
+        {
+            negative = !negative;
+            gray = false;
+            altGray = false;
+            sepia = false;
+            blur = false;
+            sobelX = false;
+            sobelY = false;
+            gradientMagnitude = false;
+            blurQuantized = false;
+        }
+
+        // Adjust brightness
+        if (key == '+')
+        {
+            brightness += 0.1;
+        }
+
+        if (key == '-')
+        {
+            brightness -= 0.1;
         }
     }
 
