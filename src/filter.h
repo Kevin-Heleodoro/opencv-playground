@@ -148,6 +148,20 @@ int sobelY3x3(cv::Mat &src, cv::Mat &dst);
 int magnitude(cv::Mat &sx, cv::Mat &sy, cv::Mat &dst);
 
 /**
+ * @brief Calculate the gradient magnitude of an image.
+ *
+ * This function calculates the gradient magnitude of an image. It does so by
+ * applying horizontal and vertical sobel filters to each pixel within a nested loop. This version of the function uses
+ * the .ptr method to access pixels. It also does not loop through the kernel, but instead calculates the sum of each
+ * row and column of the kernel separately.
+ *
+ * @param src The source image.
+ * @param dst The destination image.
+ * @return 0 if successful, -1 if error.
+ */
+int magnitude(cv::Mat &src, cv::Mat &dst);
+
+/**
  * @brief Blur a color image using a 5x5 Gaussian kernel. Quantize the image to a specified number of levels.
  *
  * This function blurs a color image using a 5x5 Gaussian kernel. It then quantizes the image to a specified number of
@@ -185,6 +199,15 @@ int embossEffect(cv::Mat &sx, cv::Mat &sy, cv::Mat &dst);
  */
 int adjustBrightness(cv::Mat &src, cv::Mat &dst, double brightness);
 
+/**
+ * @brief Create a negative of an image
+ *
+ * This function creates a negative of an image. It does so by subtracting each pixel from 255.
+ *
+ * @param src The source image.
+ * @param dst The destination image.
+ * @return 0 if successful, -1 if error.
+ */
 int negativeFilter(cv::Mat &src, cv::Mat &dst);
 
 #endif

@@ -13,7 +13,7 @@ LDLIBS = $(shell pkg-config --libs opencv4)
 
 BINDIR = ../bin
 
-photo: imgDisplay.o
+photo: imgDisplay.o filter.o
 	$(CC) $^ -o $(BINDIR)/$@.exe $(LDLIBS)
 
 vid: vidDisplay.o filter.o faceDetect.o

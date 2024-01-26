@@ -34,15 +34,25 @@ std::string getCurrentDateTimeStamp()
     return ss.str();
 }
 
-// void resetFilters(bool &gray, bool &altGray, bool &sepia, bool &blur, bool &sobelX, bool &sobelY)
-// {
-//     gray = false;
-//     altGray = false;
-//     sepia = false;
-//     blur = false;
-//     sobelX = false;
-//     sobelY = false;
-// }
+/**
+ * @brief Create a menu of commands.
+ *
+ * This function creates a menu of commands using OpenCV. The menu is displayed in a window named "Commands".
+ * The menu is a list of commands with the currently selected command highlighted in green.
+ *
+ * @param commandMat The matrix to draw the menu on.
+ * @param commands The list of commands to display.
+ * @param selectedCommand The index of the currently selected command.
+ */
+void drawMenu(cv::Mat &commandMat, const std::vector<std::string> &commands, int selectedCommand)
+{
+    commandMat = cv::Mat::zeros(500, 300, CV_8UC3);
+    for (int i = 0; i < commands.size(); ++i)
+    {
+        cv::Scalar textColor = (i == selectedCommand) ? cv::Scalar(0, 255, 0) : cv::Scalar(255, 255, 255);
+        cv::putText(commandMat, commands[i], cv::Point(10, 30 * (i + 1)), cv::FONT_HERSHEY_SIMPLEX, 0.7, textColor, 2);
+    }
+}
 
 /**
  * @brief Uses OpenCV to display live video.
@@ -60,7 +70,7 @@ std::string getCurrentDateTimeStamp()
 int main(int argc, char *argv[])
 {
     cv::VideoCapture *capdev;
-    cv::Mat frame;
+    cv::Mat frame, commandMat;
 
     capdev = new cv::VideoCapture(0);
     if (!capdev->isOpened())
@@ -81,6 +91,7 @@ int main(int argc, char *argv[])
         "Commands:",          "'q': quit",        "'s': screen shot", "'g': greyscale", "'h': alternate grayscale",
         "'p': sepia tone",    "'b': blur",        "'x': sobel x",     "'y': sobel y",   "'m': gradient magnitude",
         "'l': blur quantize", "'f': face detect", "'e': emboss",      "'n': negative",  "'+ or -': brightness"};
+    int selectedCommand = -1;
 
     // Text properties
     int baseline = 0;
@@ -88,6 +99,7 @@ int main(int argc, char *argv[])
     int lineType = 8;
     double fontScale = 1.0;
 
+    // Filter booleans
     bool gray = false;
     bool altGray = false;
     bool sepia = false;
@@ -242,26 +254,14 @@ int main(int argc, char *argv[])
             }
         }
 
-        // Text properties for command list display
-        int startY = frame.rows - (commandText.size() + 5) * 25;
-        int textX = 10;
-
-        // Display command text
-        for (const std::string &line : commandText)
-        {
-            cv::Size lineSize = cv::getTextSize(line, cv::FONT_HERSHEY_SIMPLEX, fontScale, thickness, &baseline);
-            cv::putText(frame, line, cv::Point(textX, startY), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255),
-                        thickness, lineType);
-            startY += lineSize.height + 10;
-        }
-
         // Display brightness
         std::stringstream brightnessStream;
         brightnessStream << "Brightness: " << std::fixed << std::setprecision(2) << brightness;
         std::string brightnessText = brightnessStream.str();
-        int centerX = frame.cols / 2;
         cv::Size brightnessTextSize =
             cv::getTextSize(brightnessText, cv::FONT_HERSHEY_SIMPLEX, fontScale, thickness, &baseline);
+        int startY = frame.rows - brightnessTextSize.height - 10;
+        int centerX = frame.cols / 2;
         cv::putText(frame, brightnessText, cv::Point(centerX, startY), cv::FONT_HERSHEY_SIMPLEX, 0.5,
                     cv::Scalar(255, 255, 255), thickness, lineType);
 
@@ -273,6 +273,8 @@ int main(int argc, char *argv[])
             frame = brightenedFrame;
         }
 
+        drawMenu(commandMat, commandText, selectedCommand);
+        cv::imshow("Commands", commandMat);
         // Display frame
         cv::imshow("Video", frame);
         char key = cv::waitKey(10);
@@ -280,12 +282,14 @@ int main(int argc, char *argv[])
         // Quit program
         if (key == 'q')
         {
+            selectedCommand = 1;
             break;
         }
 
         // Screen capture
         if (key == 's')
         {
+            selectedCommand = 2;
             // Get current timestamp and save screen capture
             std::string currentDateTimeStamp = getCurrentDateTimeStamp();
             cv::imwrite(currentDateTimeStamp + "_screen_capture.jpg", frame);
@@ -307,7 +311,7 @@ int main(int argc, char *argv[])
         // Toggle grayscale
         if (key == 'g')
         {
-            // resetFilters(gray, altGray, sepia, blur, sobelX, sobelY);
+            selectedCommand = 3;
             gray = !gray;
             altGray = false;
             sepia = false;
@@ -316,13 +320,14 @@ int main(int argc, char *argv[])
             sobelY = false;
             gradientMagnitude = false;
             blurQuantized = false;
-            // faceDetect = false;
+            emboss = false;
+            negative = false;
         }
 
         // Toggle alternate grayscale
         if (key == 'h')
         {
-            // resetFilters(gray, altGray, sepia, blur, sobelX, sobelY);
+            selectedCommand = 4;
             altGray = !altGray;
             gray = false;
             sepia = false;
@@ -331,13 +336,14 @@ int main(int argc, char *argv[])
             sobelY = false;
             gradientMagnitude = false;
             blurQuantized = false;
-            // faceDetect = false;
+            emboss = false;
+            negative = false;
         }
 
         // Toggle sepia tone
         if (key == 'p')
         {
-            // resetFilters(gray, altGray, sepia, blur, sobelX, sobelY);
+            selectedCommand = 5;
             sepia = !sepia;
             gray = false;
             altGray = false;
@@ -346,13 +352,14 @@ int main(int argc, char *argv[])
             sobelY = false;
             gradientMagnitude = false;
             blurQuantized = false;
-            // faceDetect = false;
+            emboss = false;
+            negative = false;
         }
 
         // Toggle blur
         if (key == 'b')
         {
-            // resetFilters(gray, altGray, sepia, blur, sobelX, sobelY);
+            selectedCommand = 6;
             blur = !blur;
             gray = false;
             altGray = false;
@@ -361,13 +368,14 @@ int main(int argc, char *argv[])
             sobelY = false;
             gradientMagnitude = false;
             blurQuantized = false;
-            // faceDetect = false;
+            emboss = false;
+            negative = false;
         }
 
         // Toggle sobel x
         if (key == 'x')
         {
-            // resetFilters(gray, altGray, sepia, blur, sobelX, sobelY);
+            selectedCommand = 7;
             sobelX = !sobelX;
             gray = false;
             altGray = false;
@@ -376,13 +384,14 @@ int main(int argc, char *argv[])
             sobelY = false;
             gradientMagnitude = false;
             blurQuantized = false;
-            // faceDetect = false;
+            emboss = false;
+            negative = false;
         }
 
         // Toggle sobel y
         if (key == 'y')
         {
-            // resetFilters(gray, altGray, sepia, blur, sobelX, sobelY);
+            selectedCommand = 8;
             sobelY = !sobelY;
             gray = false;
             altGray = false;
@@ -391,12 +400,14 @@ int main(int argc, char *argv[])
             sobelX = false;
             gradientMagnitude = false;
             blurQuantized = false;
-            // faceDetect = false;
+            emboss = false;
+            negative = false;
         }
 
         // Toggle gradient magnitude
         if (key == 'm')
         {
+            selectedCommand = 9;
             gradientMagnitude = !gradientMagnitude;
             gray = false;
             altGray = false;
@@ -405,12 +416,14 @@ int main(int argc, char *argv[])
             sobelX = false;
             sobelY = false;
             blurQuantized = false;
-            // faceDetect = false;
+            emboss = false;
+            negative = false;
         }
 
         // Toggle blur quantize
         if (key == 'l')
         {
+            selectedCommand = 10;
             blurQuantized = !blurQuantized;
             gray = false;
             altGray = false;
@@ -419,12 +432,14 @@ int main(int argc, char *argv[])
             sobelX = false;
             sobelY = false;
             gradientMagnitude = false;
-            // faceDetect = false;
+            emboss = false;
+            negative = false;
         }
 
         // Toggle face detection
         if (key == 'f')
         {
+            selectedCommand = 11;
             faceDetect = !faceDetect;
             // gray = false;
             // altGray = false;
@@ -439,6 +454,7 @@ int main(int argc, char *argv[])
         // Toggle emboss
         if (key == 'e')
         {
+            selectedCommand = 12;
             emboss = !emboss;
             gray = false;
             altGray = false;
@@ -447,11 +463,13 @@ int main(int argc, char *argv[])
             sobelX = false;
             sobelY = false;
             gradientMagnitude = false;
+            negative = false;
         }
 
         // Toggle negative
         if (key == 'n')
         {
+            selectedCommand = 13;
             negative = !negative;
             gray = false;
             altGray = false;
@@ -461,16 +479,19 @@ int main(int argc, char *argv[])
             sobelY = false;
             gradientMagnitude = false;
             blurQuantized = false;
+            emboss = false;
         }
 
         // Adjust brightness
         if (key == '+')
         {
+            selectedCommand = 14;
             brightness += 0.1;
         }
 
         if (key == '-')
         {
+            selectedCommand = 14;
             brightness -= 0.1;
         }
     }
