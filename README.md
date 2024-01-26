@@ -1,6 +1,15 @@
 # Project One
 
-## How to run
+## Run these programs
+
+1. Navigate to the directory containing the `.exe` files and run them as such:
+
+-   `./photo.exe starry_night.jpg`
+    > Relative path to any image file.
+-   `./vid.exe`
+    > Ensure the `haarcascade_frontalface_alt2.xml` file is in the same directory.
+
+## How to compile
 
 > Make sure you have opencv installed on your system.
 
@@ -33,7 +42,11 @@
 
 ## Credits
 
-[Smoothing Images Tutorial](https://docs.opencv.org/3.4/dc/dd3/tutorial_gausian_median_blur_bilateral_filter.html)
-https://stackoverflow.com/questions/16132242/apply-gaussianblur-to-individual-pixels
-https://en.wikipedia.org/wiki/Stencil_%28numerical_analysis%29
-https://onlinedocs.microchip.com/pr/GUID-37AD5EEE-6FAB-48FC-89F6-CAA649534B2A-en-US-1/index.html
+This project utilizes several external resources for its development:
+
+-   OpenCV Gaussian, Median, and Bilateral Filter Documentation: [OpenCV Docs](https://docs.opencv.org/3.4/dc/dd3/tutorial_gausian_median_blur_bilateral_filter.html)
+-   Applying GaussianBlur to Individual Pixels: [Stack Overflow](https://stackoverflow.com/questions/16132242/apply-gaussianblur-to-individual-pixels)
+-   Stencil (Numerical Analysis) on Wikipedia: [Wikipedia](https://en.wikipedia.org/wiki/Stencil_%28numerical_analysis%29)
+-   Microchip Technology Documentation: [Microchip Documentation](https://onlinedocs.microchip.com/pr/GUID-37AD5EEE-6FAB-48FC-89F6-CAA649534B2A-en-US-1/index.html)
+-   Image embossing on Wikipedia: [Wikipedia](https://en.wikipedia.org/wiki/Image_embossing)
+-   Designing Image Filters using OpenCV: [Medium](https://medium.com/dataseries/designing-image-filters-using-opencv-like-abode-photoshop-express-part-2-4479f99fb35)

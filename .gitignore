@@ -8,7 +8,7 @@
 *.dll
 
 # Executables
-*.exe
+bin/*.exe
 *.exec
 bin/*screen_capture.jpg
 bin/tested_.jpg
